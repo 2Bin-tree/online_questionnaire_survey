@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>我的调查问卷</title>
+        <link href="/static/lib/layui/css/layui.css" rel="stylesheet"/>
+        <link href="/static/css/style.css" rel="stylesheet">
+        <style>
+            table tbody tr:hover td[class~=hover] {
+                color: #1E9FFF;
+            }
+            table tbody tr td *[class~=hover-show]{
+                display: none;
+            }
+            table tbody tr:hover td *[class~=hover-show]{
+                display: inline-block;
+            }
+            table tbody tr:hover td *[class~=hover-hide]{
+                display: none;
+            }
+            .layui-btn-xs {
+                height: 20px;
+                line-height: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div th:insert="~{header}"></div>
+        <div class="layui-container">
+            <h1 class="text-primary" style="margin: 20px 0">
+                <i class="layui-icon layui-icon-list" style="font-size: 35px"></i>
+                我的问卷
+                <a href="/questionnaire/create" class="layui-btn layui-btn-normal layui-icon layui-icon-add-1" style="float: right">创建新的问卷</a>
+            </h1>
+            <table class="layui-table" lay-skin="line" style="margin-bottom: 0">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">No.</th>
+                        <th style="width: 30%">问卷名称</th>
+                        <th style="width: 30%"></th>
+                        <th style="width: 30%"></th>
+                    </tr>
+                </thead>
+            </table>
+            <table class="layui-table" lay-size="lg" lay-skin="line"
+                   style="max-height: 400px;overflow-y: auto;border-top: none;margin-top:0">
+                <tbody>
+                    <tr th:if="${list.isEmpty()}">
+                        <td colspan="4"><h3 class="text-primary">你还没有创建任何问卷啊！</h3></td>
+                    </tr>
+                    <tr th:each="q,stat :${list}">
+                        <td th:text="${stat.count}" style="width: 10%"></td>
+                        <td th:text="${q.name}" class="hover" style="width: 30%;font-size: 18px"></td>
+                        <td style="width: 30%">
+                            <span th:if="${q.status>0}" class="hover-hide">
+                                当前提交的答卷
+                                <span th:text="${q.paperCount}" class="layui-badge layui-bg-blue">0</span>
+                            </span>
+                            <a th:href="'/questionnaire/design/'+${q.id}" target="_blank" th:if="${q.status==0}" class="hover-show layui-btn layui-btn-normal layui-btn-xs">设计</a>
+                            <a th:if="${q.status!=0}" th:href="'/questionnaire/statistics/'+${q.id}" class="hover-show layui-btn layui-btn-normal layui-btn-xs">统计&分析</a>
+                            <a th:if="${q.paperCount>0}" target="_blank" th:href="'/paper/list/'+${q.id}" class="hover-show layui-btn layui-btn-normal layui-btn-xs">查看答卷</a>
+                            <a th:if="${q.status==1}" target="_blank" th:href="'/questionnaire/share?qId='+${q.id}" class="hover-show layui-btn layui-btn-normal layui-btn-xs">分享问卷</a>
+                            <a th:href="'/questionnaire/preview/'+${q.id}" target="_blank" class="hover-show layui-btn layui-btn-warm layui-btn-xs">预览</a>
+                            <button th:if="${q.status==1}" th:data-id="${q.id}" data-id="" class="stopBtn hover-show layui-btn layui-btn-warm layui-btn-xs" title="停止答卷">停止</button>
+                            <button th:if="${q.status==0}" th:data-id="${q.id}" data-id="" class="publishBtn hover-show layui-btn layui-btn-warm layui-btn-xs" title="发布答卷">发布</button>
+                            <button th:data-id="${q.id}" data-id="" class="delBtn hover-show layui-btn layui-btn-danger layui-btn-xs">删除</button>
+                            <button th:data-id="${q.id}" th:data-name="${q.name}" th:data-greeting="${q.greeting}" data-id="" class="cloneBtn hover-show layui-btn layui-btn-normal layui-btn-xs">克隆</button>
+                        </td>
+                        <td>
+                            <span th:text="'创建于'+${#dates.format( q.createDate,'yyyy/MM/dd')}"></span>
+                            <span>共<span th:text="${q.questionCount}" class="layui-badge layui-bg-blue"></span>题</span>
+                            <span th:switch="${q.status}" class="layui-badge layui-bg-orange">
+                                <span th:case="0">设计中</span>
+                                <span th:case="1">问卷收集中</span>
+                                <span th:case="2">问卷已结束</span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="page" style="text-align: right"></div>
+        </div>
+        <div style="display: none;margin: 20px" id="cloneDom">
+            <div class="layui-form-item">
+                <label class="layui-form-label">新问卷名称</label>
+                <div class="layui-input-block">
+                    <input type="text" id="cloneName" name="" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">新问卷问候语</label>
+                <div class="layui-input-block">
+                    <input type="text" id="cloneGreeting" name="" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="/static/lib/layui/layui.all.js"></script>
+    <script src="/static/lib/jquery-1.9.1.min.js"></script>
+    <script>
+        $(function (){
+            $(".publishBtn").click(function (){
+                let questionnaireId = $(this).data("id");
+                if(questionnaireId === undefined)
+                    return ;
+                layer.confirm("<span class='text-danger'>发布之后将无法再次设计修改问卷，确认发布答卷？</span>",{
+                    btn: ['确认', '取消']
+                }, function () {
+                    $.post("/questionnaire/design/publishQuestionnaire",
+                        {questionnaireId:questionnaireId },
+                        function (data){
+                            if(data.code === 200){
+                                layer.msg("发布成功！",{icon:6});
+                                document.location.reload(); //刷新页面
+                            }else{
+                                layer.msg("发布失败！"+data.msg,{icon:5});
+                            }
+                        }
+                    ).fail(function(){
+                        layer.msg("发布失败，请稍后重试！",{icon:5});
+                    });
+                }, function(){
+                    // 按钮2的事件
+                });
+            });
+            $(".stopBtn").click(function (){
+                let questionnaireId = $(this).data("id");
+                if(questionnaireId === undefined)
+                    return ;
+                layer.confirm("<span class='text-danger'>状态设为“停止”后该问卷将不能继续填写，确认停止答卷？</span>",{
+                    btn: ['确认', '取消']
+                }, function () {
+                    $.post("/questionnaire/stop",
+                        {questionnaireId:questionnaireId },
+                        function (data){
+                            if(data.code === 200){
+                                layer.msg("停止成功！",{icon:6});
+                                document.location.reload(); //刷新页面
+                            }else{
+                                layer.msg("停止失败！"+data.msg,{icon:5});
+                            }
+                        }
+                    ).fail(function(){
+                        layer.msg("停止失败，请稍后重试！",{icon:5});
+                    });
+                }, function(){
+                    // 按钮2的事件
+                });
+            });
+            $(".delBtn").click(function (){
+                let questionnaireId = $(this).data("id");
+                if(questionnaireId === undefined)
+                    return ;
+                console.log(questionnaireId);
+                layer.confirm("<span class='text-danger'>将会删除该问卷所有数据，包括已经收集的答卷且不能还原！确认删除？</span>",{
+                    btn: ['确认', '取消']
+                }, function () {
+                    $.post("/questionnaire/delete",
+                        {questionnaireId:questionnaireId },
+                        function (data){
+                            if(data.code === 200){
+                                layer.msg("删除成功！",{icon:6});
+                                document.location.reload(); //刷新页面
+                            }else{
+                                layer.msg("删除失败！"+data.msg,{icon:5});
+                            }
+                        }
+                    ).fail(function(){
+                        layer.msg("删除失败，请稍后重试！",{icon:5});
+                    });
+                }, function(){
+                    // 按钮2的事件
+                });
+            });
+            $(".cloneBtn").click(function () {
+                let questionnaireId = $(this).data("id");
+                let sourceQuestionnaireName = $(this).data("name");
+                let sourceQuestionnaireGreeting = $(this).data("greeting");
+                $("#cloneName").val(sourceQuestionnaireName + "(复制)");
+                $("#cloneGreeting").val(sourceQuestionnaireGreeting);
+                if (questionnaireId === undefined)
+                    return;
+                layer.open({
+                    type: 1,
+                    title: "克隆调查问卷：《" + sourceQuestionnaireName + "》",
+                    btn: ['确认克隆','取消'],
+                    content: $("#cloneDom"),
+                    area: ['550px', '300px'],
+                    btn1: function () {
+                        $.post("/questionnaire/copy",
+                            {
+                                questionnaireId:questionnaireId,
+                                name: $("#cloneName").val(),
+                                greeting:$("#cloneGreeting").val()
+                            },
+                            function (data){
+                                if(data.code === 200){
+                                    layer.msg("克隆成功！",{icon:6});
+                                    document.location.reload(); //刷新页面
+                                }else{
+                                    layer.msg("克隆失败！"+data.msg,{icon:5});
+                                }
+                                $("#cloneDom").hide()
+                                layer.closeAll('page')
+                            }
+                        ).fail(function(){
+                            layer.msg("克隆失败，请稍后重试！",{icon:5});
+                            $("#cloneDom").hide()
+                            layer.closeAll('page')
+                        });
+                    },
+                    btn2: function () {
+                        layer.msg("您取消了克隆！")
+                        $("#cloneDom").hide()
+                    },
+                    cancel: function(){
+                        $("#cloneDom").hide()
+                    }
+                });
+            });
+        });
+    </script>
+    <script th:inline="javascript">
+        layui.use('laypage', function(){
+            let page = layui.laypage;
+            //执行一个laypage实例
+            page.render({
+                elem: 'page', //注意，这里的 test1 是 ID，不用加 # 号
+                limit: [[${list.pageSize}]],
+                curr:[[${list.pageNum}]],
+                count: [[${list.total}]], //数据总数，从服务端得到
+                limits:[5,10,15,20],
+                theme:'#1E9FFF',
+                layout:['count','prev', 'page', 'next','limit'],
+                jump: function(obj, first){
+                    //obj包含了当前分页的所有参数，比如：
+                    console.log(obj);
+                    console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                    console.log(obj.limit); //得到每页显示的条数
+                    //首次不执行
+                    if(!first){
+                        window.location.href='/questionnaire/list?page='+obj.curr
+                            +'&size='+obj.limit;
+                    }
+                }
+            })
+        });
+    </script>
+</html>

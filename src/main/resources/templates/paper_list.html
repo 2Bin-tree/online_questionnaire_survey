@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>答卷列表</title>
+        <link href="/static/lib/layui/css/layui.css" rel="stylesheet"/>
+        <link href="/static/css/style.css" rel="stylesheet">
+        <style>
+        </style>
+    </head>
+    <body>
+        <div th:insert="~{header}"></div>
+        <div th:if="!${q}" style="margin: 50px auto;padding: 30px;box-shadow: 0 0 5px #ccc">
+            <h2>问卷不存在或者已被删除！</h2>
+        </div>
+        <div class="layui-container" th:if="${q}">
+            <h1 class="text-primary" style="margin: 20px 0">
+                <i class="layui-icon layui-icon-list" style="font-size: 35px"></i>
+                <span th:text="'《'+${q.name}+'》的答卷'"></span>
+                <a href="/questionnaire/list" class="layui-btn layui-btn-normal layui-icon layui-icon-add-1" style="float: right">返回我的问卷</a>
+            </h1>
+            <h3 th:if="${list}" class="text-dark-gray">有效答卷共计<span th:text="${q.paperCount}" class="layui-badge layui-bg-blue"></span>份</h3>
+            <table class="layui-table" lay-size="lg" lay-skin="line">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">No.</th>
+                        <th style="width: 30%">来源</th>
+                        <th style="width: 20%"></th>
+                        <th style="width: 40%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="!${list}">
+                        <td colspan="6"><h3 class="text-primary">该问卷暂时没有答卷！</h3></td>
+                    </tr>
+                    <tr th:if="${list}" th:each="p,stat :${list}">
+                        <td th:text="${stat.count}"></td>
+                        <td>
+                            ip：<span th:text="${p.ip}" class="text-dark"></span>
+                            <span th:text="${p.address}" class="text-dark">上海-上海</span>
+                            来自：<span th:text="${p.sourceText}" class="text-dark">未知</span>
+                        </td>
+                        <td>
+                            <a th:href="'/paper/view/'+${p.id}" target="_blank" class="layui-btn layui-btn-normal layui-btn-xs">查看</a>
+                            <button th:data-id="${p.id}" data-id="" id="delBtn" class="layui-btn layui-btn-danger layui-btn-xs">删除</button>
+                        </td>
+                        <td>
+                            答卷耗时：<span th:text="${p.elapsedTimeText}" class="layui-badge layui-bg-orange"></span>
+                            提交时间：<span th:text="${#dates.format(p.submitTime,'yyyy/MM/dd HH:mm:ss')}" class="text-dark"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+    <script src="/static/lib/layui/layui.all.js"></script>
+    <script src="/static/lib/jquery-1.9.1.min.js"></script>
+    <script>
+        $(function () {
+            $("#delBtn").click(function () {
+                let paperId = $(this).data("id");
+                if(paperId === undefined){
+                    return;
+                }
+                layer.confirm("" +
+                    "<span class='text-danger'>确认删除该答卷？</span>",
+                    {btn:["确认","取消"]},
+                    function(){
+                        $.post("/paper/delete",{paperId:paperId},function (resp){
+                            if(resp.code === 200){
+                                layer.msg("删除成功！",{icon:1})
+                                setTimeout(()=>window.location.reload(),2000)
+                            }else{
+                                layer.msg(resp.msg,{icon:2})
+                            }
+                        }).fail(function(){
+                            layer.msg("删除失败，请稍后重试！",{icon:5});
+                        });
+                    }
+                );
+            })
+        })
+    </script>
+</html>
