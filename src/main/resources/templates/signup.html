@@ -16,14 +16,14 @@
 
             .login-form {
                 width: 500px;
-                margin: 8% auto;
+                margin: 25% auto;
                 padding: 20px;
                 background-color: #ffffff;
                 border-radius: 10px;
             }
 
             .layui-form-pane .layui-form-label {
-                text-align: right;
+                text-align: center;
             }
         </style>
     </head>
@@ -31,18 +31,17 @@
         <div class="layui-container">
             <div style="position: fixed;top:10px;left: 5%">
                 <a href="/" style="font-size: 30px;color: #ffffff;">
-                    <i style="color:#fff;line-height: 60px;height:60px;font-size: 35px;font-weight: bold" class="layui-icon layui-icon-list"></i>
-                    问卷Online</a>
+                    <i style="color:#fff;line-height: 60px;height:60px;font-size: 35px;font-weight: bold"></i>
+                    Qusetionnaire</a>
             </div>
             <div class="layui-card login-form">
                 <div class="layui-card-header">
-                    <span class="layui-text" style="font-size: 25px;color: #1E9FFF">用户注册</span>
+                    <span class="layui-text" style="font-size: 25px;color: #16baaa">注册</span>
                 </div>
                 <div class="layui-card-body">
                     <form class="layui-form layui-form-pane">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">用户名<span
-                                    class="layui-icon layui-icon-username"></span></label>
+                            <label class="layui-form-label">用户名</label>
                             <div class="layui-input-block">
                                 <input class="layui-input" lay-verify="required|username"
                                        name="username" placeholder="用户名不能包含特殊字符且不能有空格"
@@ -50,20 +49,20 @@
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label">密码<i class="layui-icon layui-icon-password"></i></label>
+                            <label class="layui-form-label">密码</label>
                             <div class="layui-input-block">
                                 <input id="password" class="layui-input" lay-verify="required|pass" name="password"
-                                       title="密码必须包含大小写字母、数字、特殊符号，且长度为8~16！"
-                                       placeholder="密码必须包含大小写字母、数字、特殊符号，且长度为8~16！"
+                                       title="Password"
+                                       placeholder="8~16位大小写字母、数字、特殊符号"
                                        required type="password" lay-reqText="请输入密码">
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label">确认密码<i class="layui-icon layui-icon-auz"></i></label>
+                            <label class="layui-form-label">确认密码</label>
                             <div class="layui-input-block">
                                 <input autocomplete="off" class="layui-input" lay-verify="required|confirmPass"
                                        name="confirmPassword"
-                                       placeholder="再次输入密码"
+                                       placeholder="请再次输入密码"
                                        required type="password" lay-reqText="请再次确认密码">
                             </div>
                         </div>
@@ -74,15 +73,13 @@
                             <div class="layui-input-block">
                                 <input class="layui-input"
                                        name="code" required lay-verify="required"
-                                       placeholder="计算图片中算式的结果，除法只保留整数"
+                                       placeholder="请计算算式结果，除法只保留整数"
                                         type="text" lay-reqText="请输入验证码">
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <div class="layui-input-block">
-                                <button class="layui-btn layui-btn-normal" lay-filter="loginBtn" lay-submit>注册</button>
-                                <button class="layui-btn layui-btn-primary" type="reset">重置</button>
-                                <a href="/login" class="text-primary" style="line-height:38px; text-align: right;float: right">已有账号？去登陆 <i class="layui-icon layui-icon-next"></i></a>
+                            <div class="layui-form-item">
+                                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="demo-reg">注册</button>
                             </div>
                         </div>
                     </form>

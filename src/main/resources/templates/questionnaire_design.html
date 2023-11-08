@@ -8,19 +8,19 @@
         <link rel="stylesheet" href="/static/css/questionnaire-design.css">
         <style>
             body{
-                background-color: #ccc;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
+                background-image: url("/static/images/design-bg.jpg");
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: center center;
+                background-attachment: fixed;
             }
         </style>
     </head>
     <body>
         <div th:insert="~{header}"></div>
          <!--左边题目工具栏 展示可拖动创建题目的元素 -->
-        <div id="question-draggable-wrap">
+        <div id="question-draggable-wrap" style="margin:10% 20%;width: fit-content">
             <!-- 基本题型 -->
-            <h3 style="font-weight: bold">基本题型</h3>
             <ul>
                 <li class="radio-bg">
                     <div class="tool-title" title="单选题"></div>
@@ -146,7 +146,6 @@
                     </div>
                 </li>
             </ul>
-            <h3 style="font-weight: bold">辅助组件</h3>
             <ul>
                 <li class="line-bg">
                     <div class="tool-title" title="分割线"></div>
@@ -169,10 +168,10 @@
                 </li>
             </ul>
         </div>
-        <div style="position: fixed;top:100px;right: 20px;width: 200px">
-            <button class="layui-btn layui-btn-normal" style="width: 100%" id="save-btn">保存</button>
+        <div style="margin: 1% 80%;width: fit-content">
+            <button class="layui-btn layui-btn-radius" style="width: 100%" id="save-btn">保存</button>
             <br><br>
-            <button class="layui-btn layui-btn-normal" style="width: 100%" id="publish-btn">发布</button>
+            <button class="layui-btn layui-btn-radius" style="width: 100%" id="publish-btn">发布</button>
         </div>
         <!-- 题目展示区（拖动题目放置的目标区） -->
         <div id="question-container">
